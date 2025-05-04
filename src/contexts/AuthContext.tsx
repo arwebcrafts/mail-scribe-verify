@@ -47,13 +47,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       // In a real app, we would make an API request here
-      // For now, just simulate a successful login with mock data
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
       
       if (email === "demo@example.com" && password === "password") {
         setUser(mockUser);
         localStorage.setItem("mailScribeUser", JSON.stringify(mockUser));
         toast.success("Logged in successfully!");
+      } else if (email === "admin@mailscribe.com" && password === "adminpass") {
+        // Special admin user with unlimited credits
+        const adminUser: User = {
+          id: "admin-user-id",
+          name: "Admin User",
+          email: "admin@mailscribe.com",
+          isAdmin: true,
+          credits: {
+            available: 999999, // Effectively unlimited
+            used: 0,
+            planLimit: 999999
+          }
+        };
+        setUser(adminUser);
+        localStorage.setItem("mailScribeUser", JSON.stringify(adminUser));
+        toast.success("Logged in as Administrator!");
       } else {
         throw new Error("Invalid credentials");
       }
@@ -97,6 +112,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateUserCredits = (creditsUsed: number) => {
     if (!user) return;
+    
+    // Admin users don't have their credits reduced
+    if (user.isAdmin) return;
 
     const updatedCredits = {
       ...user.credits,

@@ -6,13 +6,24 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { PlusCircle, Crown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
 
 const DashboardHeader: React.FC = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   
   if (!user) return null;
   
-  const isAdmin = user.email === "admin@mailscribe.com" || user.id === "admin-user-id";
+  const isAdmin = user.isAdmin || user.email === "admin@mailscribe.com" || user.id === "admin-user-id";
+  
+  const handleBuyCredits = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // In a real application, this would redirect to a payment page
+    toast({
+      title: "Coming Soon",
+      description: "The payment system is currently being implemented. Please check back later.",
+    });
+  };
   
   return (
     <div className="mb-8">
@@ -53,10 +64,8 @@ const DashboardHeader: React.FC = () => {
           </div>
           
           {!isAdmin && (
-            <Button asChild>
-              <Link to="/pricing">
-                <PlusCircle className="w-4 h-4 mr-2" /> Buy Credits
-              </Link>
+            <Button onClick={handleBuyCredits}>
+              <PlusCircle className="w-4 h-4 mr-2" /> Buy Credits
             </Button>
           )}
         </div>

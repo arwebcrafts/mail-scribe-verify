@@ -176,16 +176,19 @@ export const VerificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setCurrentResults([]);
   };
 
+  const contextValue = {
+    currentResults,
+    recentBatches,
+    isVerifying,
+    verifyEmails,
+    verifyUploadedFile,
+    clearCurrentResults,
+    mockVerifyEmails // Add this line to expose the function to components
+  };
+
   return (
     <VerificationContext.Provider
-      value={{
-        currentResults,
-        recentBatches,
-        isVerifying,
-        verifyEmails,
-        verifyUploadedFile,
-        clearCurrentResults,
-      }}
+      value={contextValue}
     >
       {children}
     </VerificationContext.Provider>

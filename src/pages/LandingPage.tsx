@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Shield, Database, FileText, ChevronRight, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import Logo from "@/components/Logo";
+import Footer from "@/components/layout/Footer";
+import EmailVerificationTest from "@/components/EmailVerificationTest";
 
 const LandingPage: React.FC = () => {
   return (
@@ -38,7 +40,13 @@ const LandingPage: React.FC = () => {
                 <p className="text-xl text-muted-foreground animate-slide-up" style={{animationDelay: '100ms'}}>
                   Reduce bounce rates, protect your sender reputation, and improve deliverability with our powerful email verification platform.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 animate-slide-up" style={{animationDelay: '200ms'}}>
+
+                {/* Add email verification test component */}
+                <div className="pt-4 animate-slide-up" style={{animationDelay: '200ms'}}>
+                  <EmailVerificationTest />
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-4 animate-slide-up" style={{animationDelay: '300ms'}}>
                   <Button asChild size="lg">
                     <Link to="/signup">Start Free Trial</Link>
                   </Button>
@@ -49,7 +57,7 @@ const LandingPage: React.FC = () => {
                   </Button>
                 </div>
                 
-                <div className="flex flex-wrap gap-x-4 gap-y-2 mt-6 animate-slide-up" style={{animationDelay: '300ms'}}>
+                <div className="flex flex-wrap gap-x-4 gap-y-2 mt-6 animate-slide-up" style={{animationDelay: '400ms'}}>
                   <div className="flex items-center text-sm text-muted-foreground">
                     <CheckCircle className="h-4 w-4 mr-1 text-primary" /> GDPR Compliant
                   </div>
@@ -62,7 +70,7 @@ const LandingPage: React.FC = () => {
                 </div>
               </div>
               
-              <div className="md:w-1/2 mt-10 md:mt-0 flex justify-center animate-slide-up" style={{animationDelay: '400ms'}}>
+              <div className="md:w-1/2 mt-10 md:mt-0 flex justify-center animate-slide-up" style={{animationDelay: '500ms'}}>
                 <div className="w-full max-w-md relative">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-xl blur-xl opacity-50 animate-pulse-slow"></div>
                   <div className="bg-card rounded-xl p-6 border relative">
@@ -405,6 +413,8 @@ const LandingPage: React.FC = () => {
           </div>
         </section>
       </main>
+      
+      <Footer />
     </div>
   );
 };
