@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from "react";
 import { EmailVerificationResult, VerificationBatch } from "@/types";
 import { mockRecentBatches, mockVerifyEmails } from "@/data/mockData";
@@ -37,8 +36,12 @@ export const VerificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       toast.error("Please login to verify emails");
       return;
     }
-
-    if (user.credits.available < emails.length) {
+    
+    // Check if user is admin - admins have unlimited credits
+    const isAdmin = user.email === "admin@mailscribe.com" || user.id === "admin-user-id";
+    
+    // Only check credits for non-admin users
+    if (!isAdmin && user.credits.available < emails.length) {
       toast.error(`Not enough credits. You need ${emails.length} credits but only have ${user.credits.available}.`);
       return;
     }
@@ -46,6 +49,14 @@ export const VerificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setIsVerifying(true);
 
     try {
+      // For large batches, we would implement a queue-based system here
+      // For demo purposes, we'll process up to 1000 emails at once
+      // In a real implementation, we would use background jobs
+      
+      if (emails.length > 1000) {
+        toast.info(`Processing ${emails.length} emails. This may take some time...`);
+      }
+      
       const results = await mockVerifyEmails(emails);
       setCurrentResults(results);
       
@@ -65,8 +76,10 @@ export const VerificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       
       setRecentBatches(prev => [newBatch, ...prev]);
       
-      // Update user credits
-      updateUserCredits(emails.length);
+      // Only deduct credits for non-admin users
+      if (!isAdmin) {
+        updateUserCredits(emails.length);
+      }
       
       toast.success(`Successfully verified ${emails.length} emails!`);
     } catch (error) {
@@ -77,6 +90,11 @@ export const VerificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const verifyUploadedFile = async (file: File): Promise<void> => {
+    if (!user) {
+      toast.error("Please login to verify emails");
+      return;
+    }
+    
     if (!file) {
       toast.error("Please select a file to upload");
       return;
@@ -96,6 +114,20 @@ export const VerificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (emails.length === 0) {
         toast.error("No valid emails found in the CSV file");
         return;
+      }
+      
+      // Check if user is admin - admins have unlimited credits
+      const isAdmin = user.email === "admin@mailscribe.com" || user.id === "admin-user-id";
+      
+      // Only check credits for non-admin users
+      if (!isAdmin && user.credits.available < emails.length) {
+        toast.error(`Not enough credits. You need ${emails.length} credits but have only ${user.credits.available} available.`);
+        return;
+      }
+      
+      // For large batches, we'd implement a queue-based system here
+      if (emails.length > 1000) {
+        toast.info(`Processing ${emails.length} emails. This may take some time...`);
       }
       
       await verifyEmails(emails, file.name.replace('.csv', ''));

@@ -6,8 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle, Loader2, Info } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { Progress } from "@/components/ui/progress";
 
 const ManualVerification: React.FC = () => {
   const [emailsInput, setEmailsInput] = useState("");
@@ -37,13 +38,21 @@ const ManualVerification: React.FC = () => {
         .filter(email => email.length > 0).length
     : 0;
   
-  // Check if user has enough credits
-  const hasEnoughCredits = user ? user.credits.available >= emailCount : false;
+  // Check if user has enough credits (admin users have unlimited)
+  const isAdmin = user?.email === "admin@mailscribe.com" || user?.id === "admin-user-id";
+  const hasEnoughCredits = isAdmin || (user ? user.credits.available >= emailCount : false);
   
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Manual Email Verification</CardTitle>
+        <CardTitle className="flex items-center justify-between">
+          <span>Manual Email Verification</span>
+          {isAdmin && (
+            <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
+              Admin Mode - Unlimited Credits
+            </span>
+          )}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -74,14 +83,27 @@ const ManualVerification: React.FC = () => {
             />
             <p className="text-sm text-muted-foreground mt-2">
               Enter email addresses separated by commas or new lines.
+              {!isAdmin && <span className="block mt-1">Each email verification will consume 1 credit.</span>}
             </p>
           </div>
           
-          {emailCount > 0 && !hasEnoughCredits && (
+          {emailCount > 1000 && (
+            <div className="flex items-start rounded-md bg-blue-50 p-3 text-sm">
+              <Info className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0" />
+              <span>
+                Large batch detected ({emailCount} emails). Verification might take some time to complete.
+              </span>
+            </div>
+          )}
+          
+          {emailCount > 0 && !hasEnoughCredits && !isAdmin && (
             <div className="flex items-start rounded-md bg-destructive/10 p-3 text-sm">
               <AlertCircle className="h-5 w-5 text-destructive mr-2 flex-shrink-0" />
               <span>
                 Not enough credits. You need {emailCount} credits but have {user?.credits.available || 0} available.
+                <Button variant="link" className="p-0 h-auto text-sm" asChild>
+                  <a href="/pricing">Upgrade your plan</a>
+                </Button>
               </span>
             </div>
           )}
@@ -90,12 +112,13 @@ const ManualVerification: React.FC = () => {
       <CardFooter>
         <Button
           onClick={handleVerify}
-          disabled={emailCount === 0 || isVerifying || !hasEnoughCredits}
+          disabled={emailCount === 0 || isVerifying || (!hasEnoughCredits && !isAdmin)}
           className="w-full"
         >
           {isVerifying ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Verifying...
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" /> 
+              {emailCount > 1000 ? 'Processing...' : 'Verifying...'}
             </>
           ) : (
             <>
